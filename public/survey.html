@@ -60,17 +60,9 @@
   $("#submitAnswers").on("click", function(event)
   {
     event.preventDefault();
-    var newFriend = {
-      name: $("#userName").val().trim(),
-      photo: $("#picture").val().trim(),
-      scores: []
-    }
-    for (var i = 0; i < questions.length; i++)
-    {
-      var choiceMade = $("input[name='inlineRadioOptions"+i+"']:checked").val();
-      newFriend.scores.push(choiceMade);
-    }
+    var newFriend = makeNewFriend();
     console.log(JSON.stringify(newFriend));
+
     $.post("/api/friends", newFriend,
         function(data) {
           // Clear the form when submitting
@@ -81,38 +73,72 @@
             $("input[name='inlineRadioOptions"+i+"']").prop('checked', false);
           }
           //You've submitted!
-          runFriendsQuery(newFriend);
-          // location.reload();
+          determineDifferences(newFriend);
         });
   });
 
-  function runFriendsQuery(newFriend) {
+  function determineDifferences(newFriend) {
       var currentURL = window.location.origin;
-
       $.ajax({ url: currentURL + "/api/friends", method: "GET" })
       .then(function(friends) {
 
+        //variable used to make an array containing sum of differences between all friends against user's answers.
+        var differencesBetweenAll = [];
+
+        //Loop checking for differences in each question for each friend other than user.
         for (var i = 0; i < friends.length-1; i++) {
-          var differences = [];
+          var differencesInEachScore = [];
           for (var j = 0; j < questions.length; j++)
           {
             var difference = Math.abs(friends[i].scores[j] - newFriend.scores[j]);
-            differences.push(difference);
+            differencesInEachScore.push(difference);
           }
-          var numOfDifferences = 0;
-          for (var k = 0; k < differences.length; k++)
+
+          //Determining the number of differences each friend has against user.
+          var sumOfDifferences = 0;
+          for (var j = 0; j < differencesInEachScore.length; j++)
           {
-            numOfDifferences += differences[k];
+            sumOfDifferences += differencesInEachScore[j];
           }
-          console.log(numOfDifferences);
-          differences = [];
+          differencesBetweenAll.push(sumOfDifferences);
+          differencesInEachScore = [];
         }
-        // location.reload();
+
+        determineMatch(friends, differencesBetweenAll);
       });
     }
+  function determineMatch(friends, differencesBetweenAll)
+  {
+    var matchDifference = Math.min.apply(null, differencesBetweenAll);
+        var compatiblesLoc = [];
+        for (var i = 0; i < differencesBetweenAll.length; i++)
+        {
+          if (differencesBetweenAll[i] === matchDifference)
+          {
+            compatiblesLoc.push(i);
+          }
+        }
+        for (var i = 0; i < compatiblesLoc.length; i++)
+        {
+          console.log(friends[compatiblesLoc[i]].name + " matches you!");
+        }
+  }
 
+  function makeNewFriend(){
+    var newFriend = {
+      name: $("#userName").val().trim(),
+      photo: $("#picture").val().trim(),
+      scores: []
+    }
+    for (var i = 0; i < questions.length; i++)
+    {
+      var choiceMade = $("input[name='inlineRadioOptions"+i+"']:checked").val();
+      newFriend.scores.push(choiceMade);
+    }
+    return newFriend;
+  }
+  
   function prepQuestions(){
-    
     for (var i = 0; i < questions.length; i++)
     {
       var qText = $("<h3>");
