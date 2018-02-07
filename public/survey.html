@@ -60,21 +60,28 @@
   $("#submitAnswers").on("click", function(event)
   {
     event.preventDefault();
-    var newFriend = makeNewFriend();
-    console.log(JSON.stringify(newFriend));
+    if(makeNewFriend())
+    {
+      var newFriend = makeNewFriend();
+      console.log(JSON.stringify(newFriend));
 
-    $.post("/api/friends", newFriend,
-        function(data) {
-          // Clear the form when submitting
-          $("#userName").val("");
-          $("#picture").val("");
-          for (var i = 0; i < questions.length; i++)
-          {
-            $("input[name='inlineRadioOptions"+i+"']").prop('checked', false);
-          }
-          //You've submitted!
-          determineDifferences(newFriend);
-        });
+      $.post("/api/friends", newFriend,
+          function(data) {
+            // Clear the form when submitting
+            $("#userName").val("");
+            $("#picture").val("");
+            for (var i = 0; i < questions.length; i++)
+            {
+              $("input[name='inlineRadioOptions"+i+"']").prop('checked', false);
+            }
+            //You've submitted!
+            determineDifferences(newFriend);
+          });
+    }
+    else
+    {
+      console.log("please try again")
+    }
   });
 
   function determineDifferences(newFriend) {
@@ -135,9 +142,32 @@
       var choiceMade = $("input[name='inlineRadioOptions"+i+"']:checked").val();
       newFriend.scores.push(choiceMade);
     }
-    return newFriend;
+
+    if (newFriend.name)
+    {
+      if (newFriend.photo)
+      {
+        if(newFriend.scores.indexOf(NaN) === -1)
+        {
+          return newFriend;
+        }
+        else
+        {
+          alert("You need to answer all before continuing!");
+        }
+      }
+      else
+      {
+        alert("Please submit a photo of you!");
+      }
+    }
+    else
+    {
+      alert("Please submit your name");
+    }
+
   }
-  
+
   function prepQuestions(){
     for (var i = 0; i < questions.length; i++)
     {
