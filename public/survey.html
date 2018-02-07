@@ -80,7 +80,7 @@
     }
     else
     {
-      console.log("please try again")
+      console.log("please try again");
     }
   });
 
@@ -139,7 +139,7 @@
     }
     for (var i = 0; i < questions.length; i++)
     {
-      var choiceMade = $("input[name='inlineRadioOptions"+i+"']:checked").val();
+      var choiceMade = $("input[name='inlineRadioOptions"+i+"']:checked").val() || null;
       newFriend.scores.push(choiceMade);
     }
 
@@ -147,7 +147,7 @@
     {
       if (newFriend.photo)
       {
-        if(newFriend.scores.indexOf(NaN) === -1)
+        if(newFriend.scores.indexOf(null) === -1)
         {
           return newFriend;
         }
