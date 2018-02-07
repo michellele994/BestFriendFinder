@@ -92,28 +92,22 @@
       $.ajax({ url: currentURL + "/api/friends", method: "GET" })
       .then(function(friends) {
 
-        for (var i = 0; i < friends.length; i++) {
-
-          var waitlistSection = $("<div>");
-          waitlistSection.addClass("well");
-          waitlistSection.attr("id", "waitlistWell-" + i + 1);
-          $("#waitlistSection").append(waitlistSection);
-
-          var tableNumber = i + 1;
-
-          $("#waitlistWell-" + i + 1).append("<h2><span class='label label-primary'>" + tableNumber + "</span> | " + friends[i].scores + "</h2>");
-        }
-        var differences = [];
-        for (var i = 0; i < friends.length-1; i++)
-        {
+        for (var i = 0; i < friends.length-1; i++) {
+          var differences = [];
           for (var j = 0; j < questions.length; j++)
           {
             var difference = Math.abs(friends[i].scores[j] - newFriend.scores[j]);
             differences.push(difference);
           }
-          console.log(differences);
+          var numOfDifferences = 0;
+          for (var k = 0; k < differences.length; k++)
+          {
+            numOfDifferences += differences[k];
+          }
+          console.log(numOfDifferences);
           differences = [];
         }
+        // location.reload();
       });
     }
 
