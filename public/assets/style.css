@@ -1,0 +1,36 @@
+body
+{
+	background-color: #a5d6a7;
+	letter-spacing: 1.5px;
+}
+h1
+{
+	color: #1b5e20;
+}
+.titleBox
+{
+	position: absolute;
+	top: 20%;
+	width: 100%;
+}
+.jumbotron
+{
+	background-color: #e8f5e9;
+	margin: 0 auto;
+	width: 50%;
+	text-align: center;
+	border: 1px solid #1b5e20;
+	border-radius: 20px;
+	color: #1b5e20;
+}
+.vertical-center
+{
+	min-height: 100%;
+	display: flex;
+	align-items: center;
+}
+.btn
+{
+	border-color: #1b5e20;
+	color: #1b5e20;
+}

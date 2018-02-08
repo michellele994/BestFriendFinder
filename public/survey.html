@@ -1,218 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Best Friend Finder</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-  <script src="https://code.jquery.com/jquery.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<meta charset="UTF-8">
+	<title>Best Friend Finder</title>
+	<script src="https://code.jquery.com/jquery.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/stylesheet/style.css">
 </head>
 <body>
-    <div class="container-fluid">
-      <div class="jumbotron">
-        <h1>Best Friend Finder</h1>
-      </div>
-      <div class="panel-body">
-        <form>
-          <div class = "row">
-            <div class = "col-md-6">
-              <div class="form-group">
-                <label for="userName"><h3>What is your name?</h3></label>
-                <input type="text" class="form-control" id="userName" placeholder="John Doe">
-              </div>
-            </div>
-          </div>
-          <div class = "row">
-            <div class = "col-md-6">
-              <div class="form-group">
-                <label for="picture"><h3>Give us a url of your picture!</h3></label>
-                <input type="text" class="form-control" id="picture" placeholder="http://example.com/me.jpg">
-              </div>
-            </div>
-          </div>
-          <div id = "question">
-          </div>
-        </form>
-      </div>
-      <div class="panel-body">
-        <div id = "waitlistSection">
-        </div>
-      </div>
-      </div>
-
-
+	<div class="container-fluid">
+		<h1>Best Friend Finder</h1>
+		<div class="panel-body">
+			<form>
+				<div class = "row">
+					<div class = "col-md-6">
+						<div class="form-group">
+							<label for="userName"><h3>What is your name?</h3></label>
+							<input type="text" class="form-control" id="userName" placeholder="John Doe">
+						</div>
+					</div>
+				</div>
+				<div class = "row">
+					<div class = "col-md-6">
+						<div class="form-group">
+							<label for="picture"><h3>Give us a url of your picture!</h3></label>
+							<input type="text" class="form-control" id="picture" placeholder="http://example.com/me.jpg">
+						</div>
+					</div>
+				</div>
+				<div id = "question"></div>
+			</form>
+		</div>
+	</div>
 <script type="text/javascript">
-  var questions = [
-    "Question1",
-    "Question2",
-    "Question3",
-    "Question4",
-    "Question5",
-    "Question6",
-    "Question7",
-    "Question8",
-    "Question9",
-    "Question10"
-  ];
-  var answers = ["Strongly Disagree", "Disagree", "Neither", "Agree", "Strongly Agree"];
+	var questions = [
+		"Question1",
+		"Question2",
+		"Question3",
+		"Question4",
+		"Question5",
+		"Question6",
+		"Question7",
+		"Question8",
+		"Question9",
+		"Question10"
+	];
+	var answers = ["Strongly Disagree", "Disagree", "Neither", "Agree", "Strongly Agree"];
 
-  prepQuestions();
-  $("#submitAnswers").on("click", function(event)
-  {
-    event.preventDefault();
-    if(makeNewFriend())
-    {
-      var newFriend = makeNewFriend();
-      console.log(JSON.stringify(newFriend));
+	prepQuestions();
+	$("#submitAnswers").on("click", function(event)
+	{
+		event.preventDefault();
+		if(makeNewFriend())
+		{
+			var newFriend = makeNewFriend();
+			console.log(JSON.stringify(newFriend));
+			$.post("/api/friends", newFriend, function(data)
+			{
+				// Clear the form when submitting
+				$("#userName").val("");
+				$("#picture").val("");
+				for (var i = 0; i < questions.length; i++)
+				{
+					$("input[name='inlineRadioOptions"+i+"']").prop('checked', false);
+				}
+				//You've submitted!
+				determineDifferences(newFriend);
+			});
+		}
+		else
+		{
+			console.log("please try again");
+		}
+	});
 
-      $.post("/api/friends", newFriend,
-          function(data) {
-            // Clear the form when submitting
-            $("#userName").val("");
-            $("#picture").val("");
-            for (var i = 0; i < questions.length; i++)
-            {
-              $("input[name='inlineRadioOptions"+i+"']").prop('checked', false);
-            }
-            //You've submitted!
-            determineDifferences(newFriend);
-          });
-    }
-    else
-    {
-      console.log("please try again");
-    }
-  });
+	function determineDifferences(newFriend)
+	{
+		var currentURL = window.location.origin;
+		$.ajax({ url: currentURL + "/api/friends", method: "GET" }).then(function(friends)
+		{
+			//variable used to make an array containing sum of differences between all friends against user's answers.
+			var differencesBetweenAll = [];
 
-  function determineDifferences(newFriend) {
-      var currentURL = window.location.origin;
-      $.ajax({ url: currentURL + "/api/friends", method: "GET" })
-      .then(function(friends) {
+			//Loop checking for differences in each question for each friend other than user.
+			for (var i = 0; i < friends.length-1; i++)
+			{
+				var differencesInEachScore = [];
+				for (var j = 0; j < questions.length; j++)
+				{
+					var difference = Math.abs(friends[i].scores[j] - newFriend.scores[j]);
+					differencesInEachScore.push(difference);
+				}
 
-        //variable used to make an array containing sum of differences between all friends against user's answers.
-        var differencesBetweenAll = [];
+				//Determining the number of differences each friend has against user.
+				var sumOfDifferences = 0;
+				for (var j = 0; j < differencesInEachScore.length; j++)
+				{
+					sumOfDifferences += differencesInEachScore[j];
+				}
+				differencesBetweenAll.push(sumOfDifferences);
+				differencesInEachScore = [];
+			}
 
-        //Loop checking for differences in each question for each friend other than user.
-        for (var i = 0; i < friends.length-1; i++) {
-          var differencesInEachScore = [];
-          for (var j = 0; j < questions.length; j++)
-          {
-            var difference = Math.abs(friends[i].scores[j] - newFriend.scores[j]);
-            differencesInEachScore.push(difference);
-          }
+		determineMatch(friends, differencesBetweenAll);
+		});
+	}
 
-          //Determining the number of differences each friend has against user.
-          var sumOfDifferences = 0;
-          for (var j = 0; j < differencesInEachScore.length; j++)
-          {
-            sumOfDifferences += differencesInEachScore[j];
-          }
-          differencesBetweenAll.push(sumOfDifferences);
-          differencesInEachScore = [];
-        }
 
-        determineMatch(friends, differencesBetweenAll);
-      });
-    }
-  function determineMatch(friends, differencesBetweenAll)
-  {
-    var matchDifference = Math.min.apply(null, differencesBetweenAll);
-        var compatiblesLoc = [];
-        for (var i = 0; i < differencesBetweenAll.length; i++)
-        {
-          if (differencesBetweenAll[i] === matchDifference)
-          {
-            compatiblesLoc.push(i);
-          }
-        }
-        for (var i = 0; i < compatiblesLoc.length; i++)
-        {
-          console.log(friends[compatiblesLoc[i]].name + " matches you!");
-        }
-  }
+	function determineMatch(friends, differencesBetweenAll)
+	{
+		var matchDifference = Math.min.apply(null, differencesBetweenAll);
+		var compatiblesLoc = [];
+		for (var i = 0; i < differencesBetweenAll.length; i++)
+		{
+			if (differencesBetweenAll[i] === matchDifference)
+			{
+				compatiblesLoc.push(i);
+			}
+		}
+		for (var i = 0; i < compatiblesLoc.length; i++)
+		{
+			console.log(friends[compatiblesLoc[i]].name + " matches you!");
+		}
+	}
+	function makeNewFriend()
+	{
+		var newFriend = {
+			name: $("#userName").val().trim(),
+			photo: $("#picture").val().trim(),
+			scores: []
+		}
 
-  function makeNewFriend(){
-    var newFriend = {
-      name: $("#userName").val().trim(),
-      photo: $("#picture").val().trim(),
-      scores: []
-    }
-    for (var i = 0; i < questions.length; i++)
-    {
-      var choiceMade = $("input[name='inlineRadioOptions"+i+"']:checked").val() || null;
-      newFriend.scores.push(choiceMade);
-    }
+		for (var i = 0; i < questions.length; i++)
+		{
+			var choiceMade = $("input[name='inlineRadioOptions"+i+"']:checked").val() || null;
+			newFriend.scores.push(choiceMade);
+		}
 
-    if (newFriend.name)
-    {
-      if (newFriend.photo)
-      {
-        if(newFriend.scores.indexOf(null) === -1)
-        {
-          return newFriend;
-        }
-        else
-        {
-          alert("You need to answer all before continuing!");
-        }
-      }
-      else
-      {
-        alert("Please submit a photo of you!");
-      }
-    }
-    else
-    {
-      alert("Please submit your name");
-    }
+		if (newFriend.name)
+		{
+			if (newFriend.photo)
+			{
+				if(newFriend.scores.indexOf(null) === -1)
+				{
+					return newFriend;
+				}
+				else
+				{
+					alert("You need to answer all before continuing!");
+				}
+			}
+			else
+			{
+				alert("Please submit a photo of you!");
+			}
+		}
+		else
+		{
+			alert("Please submit your name");
+		}
+	}
 
-  }
+	function prepQuestions()
+	{
+		for (var i = 0; i < questions.length; i++)
+		{
+			var qText = $("<h3>");
+			qText.text(questions[i]);
+			$("#question").append(qText);
+			var form = $("<div>");
+			form.addClass("form-check form-check-inline");
+			form.attr("id", "q"+i);
+			$("#question").append(form);
+			var row = $("<div>");
+			row.addClass("row");
+			row.attr("id", "choices"+i);
+			$("#q"+i).append(row);
 
-  function prepQuestions(){
-    for (var i = 0; i < questions.length; i++)
-    {
-      var qText = $("<h3>");
-      qText.text(questions[i]);
-      $("#question").append(qText);
-      var form = $("<div>");
-      form.addClass("form-check form-check-inline");
-      form.attr("id", "q"+i);
-      $("#question").append(form);
-      var row = $("<div>");
-      row.addClass("row");
-      row.attr("id", "choices"+i);
-      $("#q"+i).append(row);
+			for (var j = 0; j < 5; j++)
+			{
+				var column = $("<div>");
+				column.addClass("col-sm-2");
+				column.attr("id","choicesCol"+j+"q"+i)
+				$("#choices"+i).append(column);
 
-      for (var j = 0; j < 5; j++)
-      {
-        var column = $("<div>");
-        column.addClass("col-sm-2");
-        column.attr("id","choicesCol"+j+"q"+i)
-        $("#choices"+i).append(column);
+				var input = $("<input>");
+				input.addClass("form-check-input");
+				input.attr("type", "radio");
+				input.attr("name", "inlineRadioOptions"+i);
+				input.attr("id", "inlineRadio"+j+"q"+i);
+				input.attr("value", j+1);
+				$("#choicesCol"+j+"q"+i).append(input);
 
-        var input = $("<input>");
-        input.addClass("form-check-input");
-        input.attr("type", "radio");
-        input.attr("name", "inlineRadioOptions"+i);
-        input.attr("id", "inlineRadio"+j+"q"+i);
-        input.attr("value", j+1);
-        $("#choicesCol"+j+"q"+i).append(input);
-
-        var label = $("<label>");
-        label.addClass("form-check-label");
-        label.attr("for", "inlineRadio"+j+"q"+i);
-        label.html(answers[j]);
-        $("#choicesCol"+j+"q"+i).append(label);
-      }
-    }
-    var button = $("<button>");
-    button.addClass("btn btn-primary");
-    button.attr("id","submitAnswers");
-    button.attr("type","submit");
-    button.text("Submit")
-    $("#question").append(button);
-
-  }
+				var label = $("<label>");
+				label.addClass("form-check-label");
+				label.attr("for", "inlineRadio"+j+"q"+i);
+				label.html(answers[j]);
+				$("#choicesCol"+j+"q"+i).append(label);
+			}
+		}
+		var button = $("<button>");
+		button.addClass("btn btn-primary");
+		button.attr("id","submitAnswers");
+		button.attr("type","submit");
+		button.text("Submit")
+		$("#question").append(button);
+	}
 </script>
 </body>
 </html>
