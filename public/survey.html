@@ -6,11 +6,13 @@
 	<script src="https://code.jquery.com/jquery.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/stylesheet/style.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
-	<div class="container-fluid">
-		<h1>Best Friend Finder</h1>
-		<div class="panel-body">
+	<div class = "survey-box">
+		<div class = "container e-container">
+			<h1>Best Friend Finder</h1>
+			<hr>
 			<form>
 				<div class = "row">
 					<div class = "col-md-6">
@@ -29,7 +31,24 @@
 					</div>
 				</div>
 				<div id = "question"></div>
+				<a id = "submit-button" class="btn btn-md" href="#" role="button">Submit</a>
 			</form>
+		</div>
+	</div>
+	<div class="modal fade" id="compatible-friends" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modal-title">Potential Best Friends!</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body"></div>
+				<div class="modal-footer">
+					<a id = "close" class="btn btn-md" role="button" data-dismiss="modal">Close</a>
+				</div>
+			</div>
 		</div>
 	</div>
 <script type="text/javascript">
@@ -48,7 +67,7 @@
 	var answers = ["Strongly Disagree", "Disagree", "Neither", "Agree", "Strongly Agree"];
 
 	prepQuestions();
-	$("#submitAnswers").on("click", function(event)
+	$("#submit-button").on("click", function(event)
 	{
 		event.preventDefault();
 		if(makeNewFriend())
@@ -66,6 +85,7 @@
 				}
 				//You've submitted!
 				determineDifferences(newFriend);
+				$('#compatible-friends').modal('show');
 			});
 		}
 		else
@@ -73,6 +93,14 @@
 			console.log("please try again");
 		}
 	});
+
+
+	$("#compatible-friends").on('shown.bs.modal', function () {
+		$('#modal-dialog').trigger('focus')
+	});
+	$('#compatible-friends').on('hidden.bs.modal', function (e) {
+		$('.modal-body').empty();
+	})
 
 	function determineDifferences(newFriend)
 	{
@@ -118,8 +146,10 @@
 				compatiblesLoc.push(i);
 			}
 		}
+
 		for (var i = 0; i < compatiblesLoc.length; i++)
 		{
+			$(".modal-body").append(friends[compatiblesLoc[i]].name + " matches you! <br>");
 			console.log(friends[compatiblesLoc[i]].name + " matches you!");
 		}
 	}
@@ -173,16 +203,26 @@
 			form.attr("id", "q"+i);
 			$("#question").append(form);
 			var row = $("<div>");
-			row.addClass("row");
+			row.addClass("row text-center");
 			row.attr("id", "choices"+i);
 			$("#q"+i).append(row);
 
 			for (var j = 0; j < 5; j++)
 			{
-				var column = $("<div>");
-				column.addClass("col-sm-2");
-				column.attr("id","choicesCol"+j+"q"+i)
-				$("#choices"+i).append(column);
+				if (answers[j]==="Strongly Disagree" || answers[j] === "Strongly Agree")
+				{
+					var column = $("<div>");
+					column.addClass("col-sm-3");
+					column.attr("id","choicesCol"+j+"q"+i);
+					$("#choices"+i).append(column)	;
+				}
+				else
+				{
+					var column = $("<div>");
+					column.addClass("col-sm-2");
+					column.attr("id","choicesCol"+j+"q"+i)
+					$("#choices"+i).append(column);
+				}
 
 				var input = $("<input>");
 				input.addClass("form-check-input");
@@ -198,13 +238,15 @@
 				label.html(answers[j]);
 				$("#choicesCol"+j+"q"+i).append(label);
 			}
+			var br = $("<br>");
+			$("#q"+i).append(br);
 		}
-		var button = $("<button>");
-		button.addClass("btn btn-primary");
-		button.attr("id","submitAnswers");
-		button.attr("type","submit");
-		button.text("Submit")
-		$("#question").append(button);
+		// var button = $("<button>");
+		// button.addClass("btn btn-md");
+		// button.attr("id","submitAnswers");
+		// button.attr("type","submit");
+		// button.text("Submit")
+		// $("#question").append(button);
 	}
 </script>
 </body>
