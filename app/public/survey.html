@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Best Friend Finder</title>
+	<title>BFF</title>
 	<script src="https://code.jquery.com/jquery.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-	<link rel="stylesheet" href="/stylesheet/style.css">
+	<link rel="stylesheet" href="/assets/style.css">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
@@ -23,13 +23,12 @@
 					</div>
 				</div>
 				<div class = "row">
-					<div class = "col-md-6">
-						<div class="form-group">
-							<label for="picture"><h3>Give us a url of your picture!</h3></label>
-							<input type="text" class="form-control" id="picture" placeholder="http://example.com/me.jpg">
-						</div>
+					<div class = "col-md-12" id = "pictures">
+						<h3>Choose a picture!</h3>
 					</div>
 				</div>
+				<br>
+				<hr>
 				<div id = "question"></div>
 				<a id = "submit-button" class="btn btn-md" href="#" role="button">Submit</a>
 			</form>
@@ -39,7 +38,7 @@
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="modal-title">Potential Best Friends!</h5>
+					<h3 class="modal-title" id="modal-title">Potential Best Friends!</h3>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
@@ -53,19 +52,19 @@
 	</div>
 <script type="text/javascript">
 	var questions = [
-		"Question1",
-		"Question2",
-		"Question3",
-		"Question4",
-		"Question5",
-		"Question6",
-		"Question7",
-		"Question8",
-		"Question9",
-		"Question10"
+		"You are a morning person.",
+		"You enjoy hanging out in large groups.",
+		"You prefer to stay indoors.",
+		"You enjoy bullying your friend(s).<p style='font-size:8px; display:inline;'>Brandon Haines, Andrew Kippur, Jason Leo</p>",
+		"You like to take group pictures and selfies.",
+		"You are willing to get drunk tattoos/piercings with your friend(s).",
+		"You enjoy playing video games.",
+		"You prefer having few, but close relationships.",
+		"You are a picky eater.",
+		"You smell good.<p style='font-size:8px; display:inline;'>NOT Brandon Haines, Andrew Kippur, Jason Leo</p>"
 	];
 	var answers = ["Strongly Disagree", "Disagree", "Neither", "Agree", "Strongly Agree"];
-
+	var picturesAvail = [];
 	prepQuestions();
 	$("#submit-button").on("click", function(event)
 	{
@@ -78,7 +77,7 @@
 			{
 				// Clear the form when submitting
 				$("#userName").val("");
-				$("#picture").val("");
+				$("input[name='pic-choice'").prop('checked', false);
 				for (var i = 0; i < questions.length; i++)
 				{
 					$("input[name='inlineRadioOptions"+i+"']").prop('checked', false);
@@ -146,18 +145,20 @@
 				compatiblesLoc.push(i);
 			}
 		}
-
+		var compatiblesPicture = [];
 		for (var i = 0; i < compatiblesLoc.length; i++)
 		{
-			$(".modal-body").append(friends[compatiblesLoc[i]].name + " matches you! <br>");
-			console.log(friends[compatiblesLoc[i]].name + " matches you!");
+			var compPic = picturesAvail[friends[compatiblesLoc[i]].photo];
+			compatiblesPicture.push(compPic);
+
+			$(".modal-body").append(compatiblesPicture[i]+" "+friends[compatiblesLoc[i]].name + " matches you!<br>");
 		}
 	}
 	function makeNewFriend()
 	{
 		var newFriend = {
 			name: $("#userName").val().trim(),
-			photo: $("#picture").val().trim(),
+			photo: $("input[name='pic-choice']:checked").val(),
 			scores: []
 		}
 
@@ -182,7 +183,7 @@
 			}
 			else
 			{
-				alert("Please submit a photo of you!");
+				alert("Please choose a photo!");
 			}
 		}
 		else
@@ -193,10 +194,11 @@
 
 	function prepQuestions()
 	{
+		prepPictures();
 		for (var i = 0; i < questions.length; i++)
 		{
 			var qText = $("<h3>");
-			qText.text(questions[i]);
+			qText.html((i+1)+". "+questions[i]);
 			$("#question").append(qText);
 			var form = $("<div>");
 			form.addClass("form-check form-check-inline");
@@ -241,12 +243,47 @@
 			var br = $("<br>");
 			$("#q"+i).append(br);
 		}
-		// var button = $("<button>");
-		// button.addClass("btn btn-md");
-		// button.attr("id","submitAnswers");
-		// button.attr("type","submit");
-		// button.text("Submit")
-		// $("#question").append(button);
+	}
+	function prepPictures()
+	{
+		for (var i = 0; i < 6; i++)
+		{
+			picturesAvail.push("<img src='/assets/images/male"+(i+1)+".png'>");
+			picturesAvail.push("<img src='/assets/images/female"+(i+1)+".png'>");
+		}
+
+		var form = $("<div>");
+		form.addClass("form-check form-check-inline");
+		form.attr("id", "choose-picture");
+		$("#pictures").append(form);
+		var row = $("<div>");
+		row.addClass("row text-center");
+		row.attr("id", "pic-choices");
+		$("#choose-picture").append(row);
+
+		for (var i = 0; i < picturesAvail.length; i++)
+		{
+			var column = $("<div>");
+			column.addClass("col-sm-2");
+			column.attr("id","pic-col"+i)
+			$("#pic-choices").append(column);
+
+			var input = $("<input>");
+			input.addClass("form-check-input hidden-radio");
+			input.attr("type", "radio");
+			input.attr("name", "pic-choice");
+			input.attr("id", "pic-radio"+i);
+			input.attr("value", i);
+			$("#pic-col"+i).append(input);
+
+			var label = $("<label>");
+			label.addClass("form-check-label");
+			label.attr("id", "pic-label"+i);
+			label.attr("for", "pic-radio"+i);
+			$("#pic-col"+i).append(label);
+
+			$("#pic-label"+i).append(picturesAvail[i]);
+		}
 	}
 </script>
 </body>

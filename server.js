@@ -8,8 +8,10 @@ var PORT = 3000;
 app.use(parser.urlencoded({ extended: true }));
 app.use(parser.json());
 
-require("./routing/apiRoutes")(app);
-require("./routing/htmlRoutes")(app);
+app.use(express.static("app/public"));
+
+require("./app/routing/apiRoutes")(app);
+require("./app/routing/htmlRoutes")(app);
 
 
 app.listen(PORT, function() {

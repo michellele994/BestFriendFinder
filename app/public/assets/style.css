@@ -50,3 +50,17 @@ hr
 	border-radius: 20px;
 	margin-bottom: 10%;
 }
+
+input[name = "pic-choice"] { /* HIDE RADIO */
+  visibility: hidden; /* Makes input not-clickable */
+  position: absolute; /* Remove input from document flow */
+}
+
+input + label > img{
+	opacity: .6;
+}
+
+input:checked + label > img{ /* (RADIO CHECKED) IMAGE STYLES */
+  background-color: red;
+  opacity: 1;
+}
