@@ -114,21 +114,14 @@
 				}
 				//You've submitted!
 				determineDifferences(newFriend);
+				//Show modal
 				$('#compatible-friends').modal('show');
 			});
 		}
 		else
 		{
-			console.log("please try again");
+			console.log("Something went wrong.");
 		}
-	});
-
-
-	$("#compatible-friends").on('shown.bs.modal', function () {
-		$('#modal-dialog').trigger('focus')
-	});
-	$('#compatible-friends').on('hidden.bs.modal', function (e) {
-		$('.modal-body').empty();
 	});
 
 	function determineDifferences(newFriend)
@@ -142,6 +135,7 @@
 			//Loop checking for differences in each question for each friend other than user.
 			for (var i = 0; i < friends.length-1; i++)
 			{
+				//variable to check the scores current player against friends[i]
 				var differencesInEachScore = [];
 				for (var j = 0; j < questions.length; j++)
 				{
@@ -156,17 +150,20 @@
 					sumOfDifferences += differencesInEachScore[j];
 				}
 				differencesBetweenAll.push(sumOfDifferences);
+				//Clearing it out for the next comparison.
 				differencesInEachScore = [];
 			}
 
-		determineMatch(friends, differencesBetweenAll);
+			determineMatch(friends, differencesBetweenAll);
 		});
 	}
 
 
 	function determineMatch(friends, differencesBetweenAll)
 	{
+		//take the minimum of an array. I found how to here: https://stackoverflow.com/questions/1669190/find-the-min-max-element-of-an-array-in-javascript
 		var matchDifference = Math.min.apply(null, differencesBetweenAll);
+		//array to store all the locations of the users with best match (minimum differences)
 		var compatiblesLoc = [];
 		for (var i = 0; i < differencesBetweenAll.length; i++)
 		{
@@ -175,17 +172,20 @@
 				compatiblesLoc.push(i);
 			}
 		}
+		//array to store the pictures of those found compatible
 		var compatiblesPicture = [];
 		for (var i = 0; i < compatiblesLoc.length; i++)
 		{
 			var compPic = picturesAvail[friends[compatiblesLoc[i]].photo];
 			compatiblesPicture.push(compPic);
 
+			//append each compatible friend to the modal.
 			$(".modal-body").append(compatiblesPicture[i]+" "+friends[compatiblesLoc[i]].name + " matches you! <a href=\"mailto:\'"+friends[compatiblesLoc[i]].email+"\'\">Send email</a>!<br>");
 		}
 	}
 	function makeNewFriend()
 	{
+		//Make a friend. If not all items are filled out correctly, then notify user with modals
 		var newFriend = {
 			name: $("#userName").val().trim(),
 			photo: $("input[name='pic-choice']:checked").val(),
@@ -233,16 +233,7 @@
 			$('#error-box').modal('show');
 		}
 	}
-
-	$("#error-box").on('shown.bs.modal', function () {
-		$('#modal-dialog').trigger('focus')
-	});
-	$('#error-box').on('hidden.bs.modal', function (e) {
-		$('.modal-error').empty();
-	})
 	
-
-
 	function prepQuestions()
 	{
 		prepPictures();
@@ -336,6 +327,19 @@
 			$("#pic-label"+i).append(picturesAvail[i]);
 		}
 	}
+
+	$("#compatible-friends").on('shown.bs.modal', function () {
+		$('#modal-dialog').trigger('focus')
+	});
+	$('#compatible-friends').on('hidden.bs.modal', function (e) {
+		$('.modal-body').empty();
+	});
+	$("#error-box").on('shown.bs.modal', function () {
+		$('#modal-dialog').trigger('focus')
+	});
+	$('#error-box').on('hidden.bs.modal', function (e) {
+		$('.modal-error').empty();
+	})
 </script>
 </body>
 </html>
