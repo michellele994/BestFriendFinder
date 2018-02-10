@@ -58,7 +58,24 @@
 			</div>
 		</div>
 	</div>
+	<div class="modal fade" id="error-box" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="modal-title" id="modal-title">Error</h3>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-error"></div>
+				<div class="modal-footer">
+					<a id = "close" class="btn btn-md" role="button" data-dismiss="modal">Close</a>
+				</div>
+			</div>
+		</div>
+	</div>
 <script type="text/javascript">
+
 	var questions = [
 		"You are a morning person.",
 		"You enjoy hanging out in large groups.",
@@ -71,16 +88,20 @@
 		"You are a picky eater.",
 		"You smell good.<p style='font-size:8px; display:inline;'>NOT Brandon Haines, Andrew Kippur, Jason Leo</p>"
 	];
+
 	var answers = ["Strongly Disagree", "Disagree", "Neither", "Agree", "Strongly Agree"];
+
 	var picturesAvail = [];
+
+	//Sets up the HTML for the questions and answers
 	prepQuestions();
+
 	$("#submit-button").on("click", function(event)
 	{
 		event.preventDefault();
 		if(makeNewFriend())
 		{
 			var newFriend = makeNewFriend();
-			console.log(JSON.stringify(newFriend));
 			$.post("/api/friends", newFriend, function(data)
 			{
 				// Clear the form when submitting
@@ -108,7 +129,7 @@
 	});
 	$('#compatible-friends').on('hidden.bs.modal', function (e) {
 		$('.modal-body').empty();
-	})
+	});
 
 	function determineDifferences(newFriend)
 	{
@@ -160,7 +181,7 @@
 			var compPic = picturesAvail[friends[compatiblesLoc[i]].photo];
 			compatiblesPicture.push(compPic);
 
-			$(".modal-body").append(compatiblesPicture[i]+" "+friends[compatiblesLoc[i]].name + " matches you! <a href='mailto:'"+friends[compatiblesLoc[i]].email+"''>Send email</a>!<br>");
+			$(".modal-body").append(compatiblesPicture[i]+" "+friends[compatiblesLoc[i]].name + " matches you! <a href=\"mailto:\'"+friends[compatiblesLoc[i]].email+"\'\">Send email</a>!<br>");
 		}
 	}
 	function makeNewFriend()
@@ -190,24 +211,37 @@
 					}
 					else
 					{
-						alert("You need to answer all before continuing!");
+						$(".modal-error").html("<p style='margin-left: 15px'>You need to answer all before continuing!</p>");
+						$('#error-box').modal('show');
 					}
 				}
 				else
 				{
-					alert("Please choose a photo!");
+					$(".modal-error").html("<p style='margin-left: 15px'>Please choose a photo!</p>");
+					$('#error-box').modal('show');
 				}
 			}
 			else
 			{
-				alert("Please enter your email!");
+				$(".modal-error").html("<p style='margin-left: 15px'>Please enter your email!</p>");
+				$('#error-box').modal('show');
 			}
 		}
 		else
 		{
-			alert("Please submit your name");
+			$(".modal-error").html("<p style='margin-left: 15px'>Please submit your name</p>");
+			$('#error-box').modal('show');
 		}
 	}
+
+	$("#error-box").on('shown.bs.modal', function () {
+		$('#modal-dialog').trigger('focus')
+	});
+	$('#error-box').on('hidden.bs.modal', function (e) {
+		$('.modal-error').empty();
+	})
+	
+
 
 	function prepQuestions()
 	{
