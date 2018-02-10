@@ -23,6 +23,14 @@
 					</div>
 				</div>
 				<div class = "row">
+					<div class = "col-md-6">
+						<div class="form-group">
+							<label for="email"><h3>What is your email?</h3></label>
+							<input type="text" class="form-control" id="email" placeholder="johndoe@gmail.com">
+						</div>
+					</div>
+				</div>
+				<div class = "row">
 					<div class = "col-md-12" id = "pictures">
 						<h3>Choose a picture!</h3>
 					</div>
@@ -77,6 +85,7 @@
 			{
 				// Clear the form when submitting
 				$("#userName").val("");
+				$("#email").val("");
 				$("input[name='pic-choice'").prop('checked', false);
 				for (var i = 0; i < questions.length; i++)
 				{
@@ -151,7 +160,7 @@
 			var compPic = picturesAvail[friends[compatiblesLoc[i]].photo];
 			compatiblesPicture.push(compPic);
 
-			$(".modal-body").append(compatiblesPicture[i]+" "+friends[compatiblesLoc[i]].name + " matches you!<br>");
+			$(".modal-body").append(compatiblesPicture[i]+" "+friends[compatiblesLoc[i]].name + " matches you! <a href='mailto:'"+friends[compatiblesLoc[i]].email+"''>Send email</a>!<br>");
 		}
 	}
 	function makeNewFriend()
@@ -159,6 +168,7 @@
 		var newFriend = {
 			name: $("#userName").val().trim(),
 			photo: $("input[name='pic-choice']:checked").val(),
+			email: $("#email").val().trim(),
 			scores: []
 		}
 
@@ -170,20 +180,27 @@
 
 		if (newFriend.name)
 		{
-			if (newFriend.photo)
+			if (newFriend.email)
 			{
-				if(newFriend.scores.indexOf(null) === -1)
+				if (newFriend.photo)
 				{
-					return newFriend;
+					if(newFriend.scores.indexOf(null) === -1)
+					{
+						return newFriend;
+					}
+					else
+					{
+						alert("You need to answer all before continuing!");
+					}
 				}
 				else
 				{
-					alert("You need to answer all before continuing!");
+					alert("Please choose a photo!");
 				}
 			}
 			else
 			{
-				alert("Please choose a photo!");
+				alert("Please enter your email!");
 			}
 		}
 		else
