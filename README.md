@@ -1,7 +1,7 @@
 # BestFriendFinder (BFF)
 https://immense-beyond-78884.herokuapp.com/
 
-* The purpose of this application initiate friendship between those who cannot make friends on their own.
+* The purpose of this application is to initiate friendship between those who cannot make friends on their own.
 
 * In this application, a user will only need to answer a set a questions before being matched up with friend(s)! This application is extremely easy to use.
 
